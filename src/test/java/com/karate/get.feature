@@ -1,3 +1,4 @@
+@parallel=false
 Feature: junit5 test
 
   Scenario:

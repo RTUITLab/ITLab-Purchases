@@ -1,3 +1,4 @@
+@parallel=false
 Feature: junit5 test
 
   Background:
@@ -16,7 +17,7 @@ Feature: junit5 test
     * karate.forEach(response, fun)
     * def res = karate.toString(id)
 
-    * def req = ({id:res,price:58.2,datePurchase:1967-07-29,amount:21})
+    * def req = ({id:res,price:58.2,datePurchase:"1967-07-29",amount:21})
 
     Given request req
     When method PUT
