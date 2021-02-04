@@ -39,10 +39,10 @@ public class GetSetController {
     }
 
     @DeleteMapping()
-    public  HttpStatus remove(@RequestParam (value = "id") String id) {
+    public  HttpStatus remove(@RequestParam (value = "id") ArrayList<String> arrayId) {
 
         Delete dd = new Delete();
-        return dd.remove(id);
+        return dd.remove(arrayId);
     }
 
     @PostMapping(consumes = "application/json", produces = "application/json")

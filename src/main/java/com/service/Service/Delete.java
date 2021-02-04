@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 public class Delete {
 
@@ -13,13 +14,22 @@ public class Delete {
     private final String username = "root";
     private final String password = "9999";
 
-    public HttpStatus remove(String id)
+    public HttpStatus remove(ArrayList<String> arrayId)
     {
         try (Connection connection = DriverManager.getConnection(url, username, password)) {
 
             Statement stmtObj = connection.createStatement();
 
-            stmtObj.execute("DELETE FROM lab_expenses.expenses WHERE id = \""+id+"\"");
+            for (String id: arrayId) {
+
+                if (id != null)
+                {
+                    stmtObj.execute("DELETE FROM lab_expenses.expenses WHERE id = \"" + id + "\"");
+                }
+            }
+
+
+            stmtObj.close();
 
         } catch (SQLException e) {
             System.out.println("Connection failed!");
