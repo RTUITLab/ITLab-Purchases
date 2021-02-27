@@ -1,7 +1,7 @@
 package com.service.Items;
 
 public class Data {
-    private long id;
+    private int id;
     private String name;
     private float price;
     private String datePurchase;
@@ -10,7 +10,7 @@ public class Data {
     private String dateTimeInDB;
     private String userName;
 
-    public Data(long id, String name, float price, String datePurchase, int amount, String dateTimeCreate, String dateTimeInDB, String userName) {
+    public Data(int id, String name, float price, String datePurchase, int amount, String dateTimeCreate, String dateTimeInDB, String userName) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -32,7 +32,7 @@ public class Data {
         this.userName = "";
     }
 
-    public void setId(long id){
+    public void setId(int id){
         this.id = id;
     }
 
@@ -64,7 +64,7 @@ public class Data {
         this.userName = userName;
     }
 
-    public long getId() { return id; }
+    public int getId() { return id; }
 
     public String getName() { return name; }
 
