@@ -37,7 +37,7 @@ public class MainController {
     public List gets(@RequestParam(value = "dateStart", defaultValue = "0000.00.00") String dateStart,
                                 @RequestParam(value = "dateEnd", defaultValue = "9999.12.30") String dateEnd) {
 
-        return expensesRepository.findAllByDatePurchaseAfterAndDatePurchaseBefore(dateStart,dateEnd);
+            return expensesRepository.find(dateStart, dateEnd);
 
     }
 
@@ -46,31 +46,35 @@ public class MainController {
 
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
 
+        try {
+            for (Integer id : arrayId) {
 
-        for (Integer id : arrayId)
+                Date dateTimeInDB = new Date();
+                String stringTimeInArchive = df.format(dateTimeInDB.getTime());
+
+                Expenses ex = expensesRepository.findFirstById(id);
+                CostName cn = ex.getIdCname();
+
+                ArchiveDB saveArchiveDB = new ArchiveDB();
+
+                saveArchiveDB.setIdExpenses(ex.getId());
+                saveArchiveDB.setName(cn.getName());
+                saveArchiveDB.setAmount(ex.getAmount());
+                saveArchiveDB.setPrice(ex.getPrice());
+                saveArchiveDB.setDatePurchase(ex.getDatePurchase());
+                saveArchiveDB.setDateTimeCreate(ex.getDateTimeCreate());
+                saveArchiveDB.setDateTimeInDB(ex.getDateTimeInDB());
+                saveArchiveDB.setDateTimeInArchive(stringTimeInArchive);
+                saveArchiveDB.setUserName(ex.getUserName());
+
+                archiveRepository.save(saveArchiveDB);
+
+                expensesRepository.deleteById(id);
+            }
+        }catch (Exception e)
         {
-
-            Date dateTimeInDB  = new Date();
-            String stringTimeInArchive = df.format(dateTimeInDB.getTime());
-
-            Expenses ex = expensesRepository.findFirstById(id);
-            CostName cn = ex.getIdCname();
-
-            ArchiveDB saveArchiveDB = new ArchiveDB();
-
-            saveArchiveDB.setIdExpenses(ex.getId());
-            saveArchiveDB.setName(cn.getName());
-            saveArchiveDB.setAmount(ex.getAmount());
-            saveArchiveDB.setPrice(ex.getPrice());
-            saveArchiveDB.setDatePurchase(ex.getDatePurchase());
-            saveArchiveDB.setDateTimeCreate(ex.getDateTimeCreate());
-            saveArchiveDB.setDateTimeInDB(ex.getDateTimeInDB());
-            saveArchiveDB.setDateTimeInArchive(stringTimeInArchive);
-            saveArchiveDB.setUserName(ex.getUserName());
-
-            archiveRepository.save(saveArchiveDB);
-
-            expensesRepository.deleteById(id);
+            System.out.println(e);
+            return HttpStatus.BAD_REQUEST;
         }
         return HttpStatus.OK;
     }
@@ -85,32 +89,31 @@ public class MainController {
         String stringTimeInDB = df.format(dateTimeInDB.getTime());
 
         int count = 0;
+        try {
 
-        for (ReceivingData d : data) {
-            for (CostName costName : costNames) {
-                count++;
-                if (d.getName().toUpperCase().equals(costName.getCheckName())) {
+            for (ReceivingData d : data) {
+                for (CostName costName : costNames) {
+                    count++;
+                    if (d.getName().toUpperCase().equals(costName.getCheckName())) {
 
 
 //                    saveArchive = expensesRepository;
 //                    saveArchive.setIdExpenses();
 
-                    saveExpenses = new Expenses();
-                    saveExpenses.setIdCname(costName);
-                    saveExpenses.setAmount(d.getAmount());
-                    saveExpenses.setPrice(d.getPrice());
-                    saveExpenses.setDatePurchase(d.getDatePurchase());
-                    saveExpenses.setDateTimeCreate(d.getDateTimeCreate());
-                    saveExpenses.setUserName(d.getUserName());
-                    saveExpenses.setDateTimeInDB(stringTimeInDB);
+                        saveExpenses = new Expenses();
+                        saveExpenses.setIdCname(costName);
+                        saveExpenses.setAmount(d.getAmount());
+                        saveExpenses.setPrice(d.getPrice());
+                        saveExpenses.setDatePurchase(d.getDatePurchase());
+                        saveExpenses.setDateTimeCreate(d.getDateTimeCreate());
+                        saveExpenses.setUserName(d.getUserName());
+                        saveExpenses.setDateTimeInDB(stringTimeInDB);
 
-                    expensesRepository.save(saveExpenses);
-                    System.out.println(saveExpenses.getId());
-                    break;
+                        expensesRepository.save(saveExpenses);
+                        System.out.println(saveExpenses.getId());
+                        break;
 
-                }else
-                    if (costNames.size() == count)
-                    {
+                    } else if (costNames.size() == count) {
                         count = 0;
                         CostName cn = new CostName();
                         cn.setName(d.getName());
@@ -131,9 +134,14 @@ public class MainController {
                         expensesRepository.save(saveExpenses);
                         System.out.println(saveExpenses.getId());
                     }
-            }
-            count = 0;
+                }
+                count = 0;
 
+            }
+        }catch (Exception e)
+        {
+            System.out.println(e);
+            return HttpStatus.BAD_REQUEST;
         }
         return HttpStatus.OK;
 
@@ -146,38 +154,44 @@ public class MainController {
         Date dateTimeInDB  = new Date();
         String stringTimeInArchive = df.format(dateTimeInDB.getTime());
 
-        Expenses ex = expensesRepository.findFirstById(data.getId());
-        CostName cn = ex.getIdCname();
+        try {
 
-        ArchiveDB saveArchiveDB = new ArchiveDB();
+            Expenses ex = expensesRepository.findFirstById(data.getId());
+            CostName cn = ex.getIdCname();
 
-        saveArchiveDB.setIdExpenses(ex.getId());
-        saveArchiveDB.setName(cn.getName());
-        saveArchiveDB.setAmount(ex.getAmount());
-        saveArchiveDB.setPrice(ex.getPrice());
-        saveArchiveDB.setDatePurchase(ex.getDatePurchase());
-        saveArchiveDB.setDateTimeCreate(ex.getDateTimeCreate());
-        saveArchiveDB.setDateTimeInDB(ex.getDateTimeInDB());
-        saveArchiveDB.setDateTimeInArchive(stringTimeInArchive);
-        saveArchiveDB.setUserName(ex.getUserName());
+            ArchiveDB saveArchiveDB = new ArchiveDB();
 
-        archiveRepository.save(saveArchiveDB);
+            saveArchiveDB.setIdExpenses(ex.getId());
+            saveArchiveDB.setName(cn.getName());
+            saveArchiveDB.setAmount(ex.getAmount());
+            saveArchiveDB.setPrice(ex.getPrice());
+            saveArchiveDB.setDatePurchase(ex.getDatePurchase());
+            saveArchiveDB.setDateTimeCreate(ex.getDateTimeCreate());
+            saveArchiveDB.setDateTimeInDB(ex.getDateTimeInDB());
+            saveArchiveDB.setDateTimeInArchive(stringTimeInArchive);
+            saveArchiveDB.setUserName(ex.getUserName());
 
-        if (data.getPrice() != 0.0)
-            ex.setPrice(data.getPrice());
+            archiveRepository.save(saveArchiveDB);
 
-        if (data.getAmount() != 0.0)
-            ex.setAmount(data.getAmount());
+            if (data.getPrice() != 0.0)
+                ex.setPrice(data.getPrice());
 
-        if (!data.getDatePurchase().equals(""))
-            ex.setDatePurchase(data.getDatePurchase());
+            if (data.getAmount() != 0.0)
+                ex.setAmount(data.getAmount());
 
-        if (!data.getUserName().equals(""))
-            ex.setUserName(data.getUserName());
+            if (!data.getDatePurchase().equals(""))
+                ex.setDatePurchase(data.getDatePurchase());
 
-        expensesRepository.save(ex);
+            if (!data.getUserName().equals(""))
+                ex.setUserName(data.getUserName());
 
+            expensesRepository.save(ex);
 
+        }catch (Exception e)
+        {
+            System.out.println(e);
+            return HttpStatus.BAD_REQUEST;
+        }
 
         return HttpStatus.OK;
 
