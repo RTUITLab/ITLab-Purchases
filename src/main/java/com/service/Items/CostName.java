@@ -1,6 +1,7 @@
 package com.service.Items;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 @Table(name = "costname")
@@ -14,6 +15,24 @@ public class CostName {
 
     @Column (name="checkname")
     private String checkName;
+
+    @OneToMany(mappedBy="idCname",cascade = CascadeType.REFRESH)
+    private Set<Expenses> expensesSet;
+
+    public CostName()
+    {
+        super();
+    }
+
+    public Set<Expenses> getExpenses()
+    {
+        return expensesSet;
+    }
+
+    public void setExpenses(Set<Expenses> expensesSet)
+    {
+        this.expensesSet = expensesSet;
+    }
 
     public Integer getId() {
         return id;

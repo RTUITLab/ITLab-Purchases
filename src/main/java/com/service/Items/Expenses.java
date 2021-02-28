@@ -9,8 +9,17 @@ public class Expenses {
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "idcname")
-    private Integer idCname;
+//    @Column(name = "idcname")
+//    private Integer idCname;
+
+    public Expenses()
+    {
+        super();
+    }
+
+    @ManyToOne(cascade= CascadeType.REFRESH)
+    @JoinColumn(name = "idcname")
+    private CostName idCname;
 
     @Column(name = "price")
     private float price;
@@ -38,11 +47,11 @@ public class Expenses {
         this.id = id;
     }
 
-    public Integer getIdCname() {
+    public CostName getIdCname() {
         return idCname;
     }
 
-    public void setIdCname(Integer idCname) {
+    public void setIdCname(CostName idCname) {
         this.idCname = idCname;
     }
 

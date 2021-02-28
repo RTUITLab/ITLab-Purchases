@@ -10,7 +10,7 @@ public interface CostRepository extends CrudRepository<CostName, Integer> {
 
     CostName findFirstById(int id);
 
-    @Query("SELECT c.id FROM CostName c WHERE c.checkName = :checkName")
-        Integer findId(@Param("checkName") String checkName);
+    @Query("SELECT c FROM CostName c WHERE c.checkName = :checkName")
+        CostName find(@Param("checkName") String checkName);
 
 }

@@ -54,7 +54,7 @@ public class MainController {
             String stringTimeInArchive = df.format(dateTimeInDB.getTime());
 
             Expenses ex = expensesRepository.findFirstById(id);
-            CostName cn = costRepository.findFirstById(ex.getIdCname());
+            CostName cn = ex.getIdCname();
 
             ArchiveDB saveArchiveDB = new ArchiveDB();
 
@@ -78,14 +78,17 @@ public class MainController {
     @PostMapping(consumes = "application/json", produces = "application/json")
     public HttpStatus set(@RequestBody ArrayList<ReceivingData> data) {
 
-        Iterable<CostName> costNames = costRepository.findAll();
+        ArrayList<CostName> costNames = (ArrayList<CostName>) costRepository.findAll();
         Expenses saveExpenses;
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
         Date dateTimeInDB  = new Date();
         String stringTimeInDB = df.format(dateTimeInDB.getTime());
 
+        int count = 0;
+
         for (ReceivingData d : data) {
             for (CostName costName : costNames) {
+                count++;
                 if (d.getName().toUpperCase().equals(costName.getCheckName())) {
 
 
@@ -93,7 +96,7 @@ public class MainController {
 //                    saveArchive.setIdExpenses();
 
                     saveExpenses = new Expenses();
-                    saveExpenses.setIdCname(costName.getId());
+                    saveExpenses.setIdCname(costName);
                     saveExpenses.setAmount(d.getAmount());
                     saveExpenses.setPrice(d.getPrice());
                     saveExpenses.setDatePurchase(d.getDatePurchase());
@@ -106,9 +109,9 @@ public class MainController {
                     break;
 
                 }else
-                    if (!costNames.iterator().hasNext())
+                    if (costNames.size() == count)
                     {
-
+                        count = 0;
                         CostName cn = new CostName();
                         cn.setName(d.getName());
                         cn.setCheckName(d.getName().toUpperCase());
@@ -116,8 +119,9 @@ public class MainController {
                         costRepository.save(cn);
 
                         saveExpenses = new Expenses();
-                        saveExpenses.setIdCname(costRepository.findId(d.getName().toUpperCase()));
+                        saveExpenses.setIdCname(costRepository.find(d.getName().toUpperCase()));
                         saveExpenses.setAmount(d.getAmount());
+                        saveExpenses.setPrice(d.getPrice());
                         saveExpenses.setPrice(d.getPrice());
                         saveExpenses.setDatePurchase(d.getDatePurchase());
                         saveExpenses.setDateTimeCreate(d.getDateTimeCreate());
@@ -128,6 +132,7 @@ public class MainController {
                         System.out.println(saveExpenses.getId());
                     }
             }
+            count = 0;
 
         }
         return HttpStatus.OK;
@@ -142,7 +147,7 @@ public class MainController {
         String stringTimeInArchive = df.format(dateTimeInDB.getTime());
 
         Expenses ex = expensesRepository.findFirstById(data.getId());
-        CostName cn = costRepository.findFirstById(ex.getIdCname());
+        CostName cn = ex.getIdCname();
 
         ArchiveDB saveArchiveDB = new ArchiveDB();
 
@@ -158,9 +163,18 @@ public class MainController {
 
         archiveRepository.save(saveArchiveDB);
 
-        ex.setPrice(data.getPrice());
-        ex.setAmount(data.getAmount());
-        ex.setDatePurchase(data.getDatePurchase());
+        if (data.getPrice() != 0.0)
+            ex.setPrice(data.getPrice());
+
+        if (data.getAmount() != 0.0)
+            ex.setAmount(data.getAmount());
+
+        if (!data.getDatePurchase().equals(""))
+            ex.setDatePurchase(data.getDatePurchase());
+
+        if (!data.getUserName().equals(""))
+            ex.setUserName(data.getUserName());
+
         expensesRepository.save(ex);
 
 
