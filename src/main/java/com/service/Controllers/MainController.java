@@ -82,23 +82,18 @@ public class MainController {
     @PostMapping(consumes = "application/json", produces = "application/json")
     public HttpStatus set(@RequestBody ArrayList<ReceivingData> data) {
 
-        ArrayList<CostName> costNames = (ArrayList<CostName>) costRepository.findAll();
         Expenses saveExpenses;
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
         Date dateTimeInDB  = new Date();
         String stringTimeInDB = df.format(dateTimeInDB.getTime());
 
-        int count = 0;
         try {
 
             for (ReceivingData d : data) {
-                for (CostName costName : costNames) {
-                    count++;
-                    if (d.getName().toUpperCase().equals(costName.getCheckName())) {
 
+                CostName costName = costRepository.find(d.getName().toUpperCase());
 
-//                    saveArchive = expensesRepository;
-//                    saveArchive.setIdExpenses();
+                    if (costName != null) {
 
                         saveExpenses = new Expenses();
                         saveExpenses.setIdCname(costName);
@@ -111,10 +106,8 @@ public class MainController {
 
                         expensesRepository.save(saveExpenses);
                         System.out.println(saveExpenses.getId());
-                        break;
 
-                    } else if (costNames.size() == count) {
-                        count = 0;
+                    } else {
                         CostName cn = new CostName();
                         cn.setName(d.getName());
                         cn.setCheckName(d.getName().toUpperCase());
@@ -133,9 +126,8 @@ public class MainController {
 
                         expensesRepository.save(saveExpenses);
                         System.out.println(saveExpenses.getId());
+
                     }
-                }
-                count = 0;
 
             }
         }catch (Exception e)

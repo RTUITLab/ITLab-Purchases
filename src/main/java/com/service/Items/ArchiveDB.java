@@ -6,7 +6,7 @@ import javax.persistence.*;
 @Table(name = "archive")
 public class ArchiveDB {
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy= GenerationType.AUTO)
     private Integer id;
 
     @Column(name = "idexpenses")
