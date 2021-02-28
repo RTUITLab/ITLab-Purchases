@@ -1,0 +1,33 @@
+version: "3"
+services:
+  docker-mysql:
+    container_name: docker-mysql
+    image: mysql
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_DATABASE: lab_expenses
+      MYSQL_ROOT_PASSWORD: 9999
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - '3306:3306'
+    healthcheck:
+      test: "/usr/bin/mysql --user=root --password=9999--execute \"SHOW DATABASES;\""
+      interval: 2s
+      timeout: 20s
+      retries: 10
+    cap_add:
+      - SYS_NICE  # CAP_SYS_NICE
+  lab_expenses-app:
+    image: purchases-spring-boot-app
+    build: ./
+    expose:
+      - "8080"
+    ports:
+      - '8080:8080'
+    environment:
+      WAIT_HOSTS: mysql:3306
+    volumes:
+      - /data/purchases-spring-boot-app
+    depends_on:
+      - docker-mysql

@@ -37,7 +37,7 @@ public class MainController {
     public List gets(@RequestParam(value = "dateStart", defaultValue = "0000.00.00") String dateStart,
                                 @RequestParam(value = "dateEnd", defaultValue = "9999.12.30") String dateEnd) {
 
-        return expensesRepository.findAllByDatePurchaseAfterAndDatePurchaseBefore(dateStart,dateEnd);
+            return expensesRepository.find(dateStart, dateEnd);
 
     }
 
@@ -46,15 +46,110 @@ public class MainController {
 
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
 
+        try {
+            for (Integer id : arrayId) {
 
-        for (Integer id : arrayId)
+                Date dateTimeInDB = new Date();
+                String stringTimeInArchive = df.format(dateTimeInDB.getTime());
+
+                Expenses ex = expensesRepository.findFirstById(id);
+                CostName cn = ex.getIdCname();
+
+                ArchiveDB saveArchiveDB = new ArchiveDB();
+
+                saveArchiveDB.setIdExpenses(ex.getId());
+                saveArchiveDB.setName(cn.getName());
+                saveArchiveDB.setAmount(ex.getAmount());
+                saveArchiveDB.setPrice(ex.getPrice());
+                saveArchiveDB.setDatePurchase(ex.getDatePurchase());
+                saveArchiveDB.setDateTimeCreate(ex.getDateTimeCreate());
+                saveArchiveDB.setDateTimeInDB(ex.getDateTimeInDB());
+                saveArchiveDB.setDateTimeInArchive(stringTimeInArchive);
+                saveArchiveDB.setUserName(ex.getUserName());
+
+                archiveRepository.save(saveArchiveDB);
+
+                expensesRepository.deleteById(id);
+            }
+        }catch (Exception e)
         {
+            System.out.println(e);
+            return HttpStatus.BAD_REQUEST;
+        }
+        return HttpStatus.OK;
+    }
 
-            Date dateTimeInDB  = new Date();
-            String stringTimeInArchive = df.format(dateTimeInDB.getTime());
+    @PostMapping(consumes = "application/json", produces = "application/json")
+    public HttpStatus set(@RequestBody ArrayList<ReceivingData> data) {
 
-            Expenses ex = expensesRepository.findFirstById(id);
-            CostName cn = costRepository.findFirstById(ex.getIdCname());
+        Expenses saveExpenses;
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
+        Date dateTimeInDB  = new Date();
+        String stringTimeInDB = df.format(dateTimeInDB.getTime());
+
+        try {
+
+            for (ReceivingData d : data) {
+
+                CostName costName = costRepository.find(d.getName().toUpperCase());
+
+                    if (costName != null) {
+
+                        saveExpenses = new Expenses();
+                        saveExpenses.setIdCname(costName);
+                        saveExpenses.setAmount(d.getAmount());
+                        saveExpenses.setPrice(d.getPrice());
+                        saveExpenses.setDatePurchase(d.getDatePurchase());
+                        saveExpenses.setDateTimeCreate(d.getDateTimeCreate());
+                        saveExpenses.setUserName(d.getUserName());
+                        saveExpenses.setDateTimeInDB(stringTimeInDB);
+
+                        expensesRepository.save(saveExpenses);
+                        System.out.println(saveExpenses.getId());
+
+                    } else {
+                        CostName cn = new CostName();
+                        cn.setName(d.getName());
+                        cn.setCheckName(d.getName().toUpperCase());
+
+                        costRepository.save(cn);
+
+                        saveExpenses = new Expenses();
+                        saveExpenses.setIdCname(costRepository.find(d.getName().toUpperCase()));
+                        saveExpenses.setAmount(d.getAmount());
+                        saveExpenses.setPrice(d.getPrice());
+                        saveExpenses.setPrice(d.getPrice());
+                        saveExpenses.setDatePurchase(d.getDatePurchase());
+                        saveExpenses.setDateTimeCreate(d.getDateTimeCreate());
+                        saveExpenses.setUserName(d.getUserName());
+                        saveExpenses.setDateTimeInDB(stringTimeInDB);
+
+                        expensesRepository.save(saveExpenses);
+                        System.out.println(saveExpenses.getId());
+
+                    }
+
+            }
+        }catch (Exception e)
+        {
+            System.out.println(e);
+            return HttpStatus.BAD_REQUEST;
+        }
+        return HttpStatus.OK;
+
+    }
+
+    @PutMapping(consumes = "application/json", produces = "application/json")
+    public HttpStatus put(@RequestBody Data data)
+    {
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
+        Date dateTimeInDB  = new Date();
+        String stringTimeInArchive = df.format(dateTimeInDB.getTime());
+
+        try {
+
+            Expenses ex = expensesRepository.findFirstById(data.getId());
+            CostName cn = ex.getIdCname();
 
             ArchiveDB saveArchiveDB = new ArchiveDB();
 
@@ -70,100 +165,25 @@ public class MainController {
 
             archiveRepository.save(saveArchiveDB);
 
-            expensesRepository.deleteById(id);
+            if (data.getPrice() != 0.0)
+                ex.setPrice(data.getPrice());
+
+            if (data.getAmount() != 0.0)
+                ex.setAmount(data.getAmount());
+
+            if (!data.getDatePurchase().equals(""))
+                ex.setDatePurchase(data.getDatePurchase());
+
+            if (!data.getUserName().equals(""))
+                ex.setUserName(data.getUserName());
+
+            expensesRepository.save(ex);
+
+        }catch (Exception e)
+        {
+            System.out.println(e);
+            return HttpStatus.BAD_REQUEST;
         }
-        return HttpStatus.OK;
-    }
-
-    @PostMapping(consumes = "application/json", produces = "application/json")
-    public HttpStatus set(@RequestBody ArrayList<ReceivingData> data) {
-
-        Iterable<CostName> costNames = costRepository.findAll();
-        Expenses saveExpenses;
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
-        Date dateTimeInDB  = new Date();
-        String stringTimeInDB = df.format(dateTimeInDB.getTime());
-
-        for (ReceivingData d : data) {
-            for (CostName costName : costNames) {
-                if (d.getName().toUpperCase().equals(costName.getCheckName())) {
-
-
-//                    saveArchive = expensesRepository;
-//                    saveArchive.setIdExpenses();
-
-                    saveExpenses = new Expenses();
-                    saveExpenses.setIdCname(costName.getId());
-                    saveExpenses.setAmount(d.getAmount());
-                    saveExpenses.setPrice(d.getPrice());
-                    saveExpenses.setDatePurchase(d.getDatePurchase());
-                    saveExpenses.setDateTimeCreate(d.getDateTimeCreate());
-                    saveExpenses.setUserName(d.getUserName());
-                    saveExpenses.setDateTimeInDB(stringTimeInDB);
-
-                    expensesRepository.save(saveExpenses);
-                    System.out.println(saveExpenses.getId());
-                    break;
-
-                }else
-                    if (!costNames.iterator().hasNext())
-                    {
-
-                        CostName cn = new CostName();
-                        cn.setName(d.getName());
-                        cn.setCheckName(d.getName().toUpperCase());
-
-                        costRepository.save(cn);
-
-                        saveExpenses = new Expenses();
-                        saveExpenses.setIdCname(costRepository.findId(d.getName().toUpperCase()));
-                        saveExpenses.setAmount(d.getAmount());
-                        saveExpenses.setPrice(d.getPrice());
-                        saveExpenses.setDatePurchase(d.getDatePurchase());
-                        saveExpenses.setDateTimeCreate(d.getDateTimeCreate());
-                        saveExpenses.setUserName(d.getUserName());
-                        saveExpenses.setDateTimeInDB(stringTimeInDB);
-
-                        expensesRepository.save(saveExpenses);
-                        System.out.println(saveExpenses.getId());
-                    }
-            }
-
-        }
-        return HttpStatus.OK;
-
-    }
-
-    @PutMapping(consumes = "application/json", produces = "application/json")
-    public HttpStatus put(@RequestBody Data data)
-    {
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
-        Date dateTimeInDB  = new Date();
-        String stringTimeInArchive = df.format(dateTimeInDB.getTime());
-
-        Expenses ex = expensesRepository.findFirstById(data.getId());
-        CostName cn = costRepository.findFirstById(ex.getIdCname());
-
-        ArchiveDB saveArchiveDB = new ArchiveDB();
-
-        saveArchiveDB.setIdExpenses(ex.getId());
-        saveArchiveDB.setName(cn.getName());
-        saveArchiveDB.setAmount(ex.getAmount());
-        saveArchiveDB.setPrice(ex.getPrice());
-        saveArchiveDB.setDatePurchase(ex.getDatePurchase());
-        saveArchiveDB.setDateTimeCreate(ex.getDateTimeCreate());
-        saveArchiveDB.setDateTimeInDB(ex.getDateTimeInDB());
-        saveArchiveDB.setDateTimeInArchive(stringTimeInArchive);
-        saveArchiveDB.setUserName(ex.getUserName());
-
-        archiveRepository.save(saveArchiveDB);
-
-        ex.setPrice(data.getPrice());
-        ex.setAmount(data.getAmount());
-        ex.setDatePurchase(data.getDatePurchase());
-        expensesRepository.save(ex);
-
-
 
         return HttpStatus.OK;
 
