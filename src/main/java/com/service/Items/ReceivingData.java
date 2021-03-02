@@ -1,16 +1,18 @@
 package com.service.Items;
 
+import java.util.Date;
+
 public class ReceivingData {
 
     private final String name;
     private final float price;
     private final int amount;
-    private final String datePurchase;
-    private final String dateTimeCreate;
+    private final Date datePurchase;
+    private final Date dateTimeCreate;
     private final String userName;
 
 
-    public ReceivingData(String name, float price, String datePurchase, int amount, String dateTimeCreate, String userName) {
+    public ReceivingData(String name, float price, Date datePurchase, int amount, Date dateTimeCreate, String userName) {
         this.name = name;
         this.price = price;
         this.datePurchase = datePurchase;
@@ -22,9 +24,9 @@ public class ReceivingData {
     public ReceivingData() {
         this.name = "";
         this.price = 0;
-        this.datePurchase = "";
+        this.datePurchase = null;
         this.amount = 0;
-        this.dateTimeCreate = "";
+        this.dateTimeCreate = null;
         this.userName = "";
     }
 
@@ -34,9 +36,9 @@ public class ReceivingData {
 
     public int getAmount() { return amount; }
 
-    public String getDatePurchase() { return datePurchase;  }
+    public Date getDatePurchase() { return datePurchase;  }
 
-    public String getDateTimeCreate() { return dateTimeCreate; }
+    public Date getDateTimeCreate() { return dateTimeCreate; }
 
     public String getUserName() { return userName; }
 }

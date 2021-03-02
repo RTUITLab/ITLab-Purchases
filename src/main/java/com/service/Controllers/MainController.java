@@ -50,7 +50,6 @@ public class MainController {
             for (Integer id : arrayId) {
 
                 Date dateTimeInDB = new Date();
-                String stringTimeInArchive = df.format(dateTimeInDB.getTime());
 
                 Expenses ex = expensesRepository.findFirstById(id);
                 CostName cn = ex.getIdCname();
@@ -64,7 +63,7 @@ public class MainController {
                 saveArchiveDB.setDatePurchase(ex.getDatePurchase());
                 saveArchiveDB.setDateTimeCreate(ex.getDateTimeCreate());
                 saveArchiveDB.setDateTimeInDB(ex.getDateTimeInDB());
-                saveArchiveDB.setDateTimeInArchive(stringTimeInArchive);
+                saveArchiveDB.setDateTimeInArchive(dateTimeInDB);
                 saveArchiveDB.setUserName(ex.getUserName());
                 saveArchiveDB.setActToChange("Delete");
 
@@ -86,7 +85,6 @@ public class MainController {
         Expenses saveExpenses;
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
         Date dateTimeInDB  = new Date();
-        String stringTimeInDB = df.format(dateTimeInDB.getTime());
 
         try {
 
@@ -103,7 +101,7 @@ public class MainController {
                         saveExpenses.setDatePurchase(d.getDatePurchase());
                         saveExpenses.setDateTimeCreate(d.getDateTimeCreate());
                         saveExpenses.setUserName(d.getUserName());
-                        saveExpenses.setDateTimeInDB(stringTimeInDB);
+                        saveExpenses.setDateTimeInDB(dateTimeInDB);
 
                         expensesRepository.save(saveExpenses);
                         System.out.println(saveExpenses.getId());
@@ -123,7 +121,7 @@ public class MainController {
                         saveExpenses.setDatePurchase(d.getDatePurchase());
                         saveExpenses.setDateTimeCreate(d.getDateTimeCreate());
                         saveExpenses.setUserName(d.getUserName());
-                        saveExpenses.setDateTimeInDB(stringTimeInDB);
+                        saveExpenses.setDateTimeInDB(dateTimeInDB);
 
                         expensesRepository.save(saveExpenses);
                         System.out.println(saveExpenses.getId());
@@ -145,7 +143,6 @@ public class MainController {
     {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
         Date dateTimeInDB  = new Date();
-        String stringTimeInArchive = df.format(dateTimeInDB.getTime());
 
         try {
 
@@ -161,7 +158,7 @@ public class MainController {
             saveArchiveDB.setDatePurchase(ex.getDatePurchase());
             saveArchiveDB.setDateTimeCreate(ex.getDateTimeCreate());
             saveArchiveDB.setDateTimeInDB(ex.getDateTimeInDB());
-            saveArchiveDB.setDateTimeInArchive(stringTimeInArchive);
+            saveArchiveDB.setDateTimeInArchive(dateTimeInDB);
             saveArchiveDB.setUserName(ex.getUserName());
             saveArchiveDB.setActToChange("Update");
 
