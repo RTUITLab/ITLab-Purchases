@@ -36,6 +36,9 @@ public class ArchiveDB {
     @Column(name = "datetimeinarchive")
     private String dateTimeInArchive;
 
+    @Column(name = "acttochange")
+    private String actToChange;
+
     public Integer getId() {
         return id;
     }
@@ -114,6 +117,14 @@ public class ArchiveDB {
 
     public void setDateTimeInArchive(String dateTimeInArchive) {
         this.dateTimeInArchive = dateTimeInArchive;
+    }
+
+    public void setActToChange(String actToChange) {
+        this.actToChange = actToChange;
+    }
+
+    public String getActToChange() {
+        return actToChange;
     }
 
 }

@@ -66,6 +66,7 @@ public class MainController {
                 saveArchiveDB.setDateTimeInDB(ex.getDateTimeInDB());
                 saveArchiveDB.setDateTimeInArchive(stringTimeInArchive);
                 saveArchiveDB.setUserName(ex.getUserName());
+                saveArchiveDB.setActToChange("Delete");
 
                 archiveRepository.save(saveArchiveDB);
 
@@ -162,6 +163,7 @@ public class MainController {
             saveArchiveDB.setDateTimeInDB(ex.getDateTimeInDB());
             saveArchiveDB.setDateTimeInArchive(stringTimeInArchive);
             saveArchiveDB.setUserName(ex.getUserName());
+            saveArchiveDB.setActToChange("Update");
 
             archiveRepository.save(saveArchiveDB);
 
