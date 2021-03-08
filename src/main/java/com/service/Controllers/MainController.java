@@ -1,7 +1,5 @@
 package com.service.Controllers;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -9,7 +7,9 @@ import java.util.List;
 import com.service.Items.*;
 import com.service.Repositoris.*;
 import com.service.Repositoris.ArchRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,32 +19,41 @@ public class MainController {
     private final ExpensesRepository expensesRepository;
     private final ArchRepository archiveRepository;
 
+    //    docker-mysql
     public MainController(CostRepository costRepository, ExpensesRepository expensesRepository, ArchRepository archiveRepository) {
         this.costRepository = costRepository;
         this.expensesRepository = expensesRepository;
         this.archiveRepository = archiveRepository;
     }
 
-    @GetMapping("/check")
-    @ResponseStatus(HttpStatus.OK)
-    public HttpStatus check()
-    {
-        return HttpStatus.OK;
+    @Value("${Key}")
+        String getToken;
 
+    @GetMapping("/check")
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    public ResponseEntity check(@RequestHeader(value="Authentication") String header)
+    {
+        if(header.equals(getToken))
+            return ResponseEntity.ok().body("OK");
+        return  ResponseEntity.badRequest().body("Неверный токен");
     }
 
     @GetMapping()
-    public List gets(@RequestParam(value = "dateStart", defaultValue = "0000.00.00") String dateStart,
-                                @RequestParam(value = "dateEnd", defaultValue = "9999.12.30") String dateEnd) {
+    public ResponseEntity<List> gets(@RequestParam(value = "dateStart", defaultValue = "0000.00.00") String dateStart,
+                                @RequestParam(value = "dateEnd", defaultValue = "9999.12.30") String dateEnd,
+                                @RequestHeader(value="Authentication") String header) {
 
-            return expensesRepository.find(dateStart, dateEnd);
-
+        if(header.equals(getToken))
+            return new ResponseEntity<List>(expensesRepository.find(dateStart, dateEnd), HttpStatus.OK);
+        return ResponseEntity.badRequest().build();
     }
 
     @DeleteMapping()
-    public HttpStatus remove(@RequestParam (value = "id") ArrayList<Integer> arrayId) {
+    public ResponseEntity remove(@RequestParam (value = "id") ArrayList<Integer> arrayId,
+                                 @RequestHeader(value="Authentication") String header) {
 
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
+        if(!header.equals(getToken))
+            return ResponseEntity.badRequest().body("Неверный токен");
 
         try {
             for (Integer id : arrayId) {
@@ -73,17 +82,21 @@ public class MainController {
             }
         }catch (Exception e)
         {
-            System.out.println(e);
-            return HttpStatus.BAD_REQUEST;
+            System.out.println("Ошибка при удалении");
+            return ResponseEntity.badRequest().body("Ошибка при удалении");
         }
-        return HttpStatus.OK;
+        return ResponseEntity.ok().body("ОК");
     }
 
     @PostMapping(consumes = "application/json", produces = "application/json")
-    public HttpStatus set(@RequestBody ArrayList<ReceivingData> data) {
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    public ResponseEntity set(@RequestBody ArrayList<ReceivingData> data,
+                              @RequestHeader(value="Authentication") String header) {
+
+        if(!header.equals(getToken))
+            return ResponseEntity.badRequest().body("Неверный токен");
 
         Expenses saveExpenses;
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
         Date dateTimeInDB  = new Date();
 
         try {
@@ -131,17 +144,20 @@ public class MainController {
             }
         }catch (Exception e)
         {
-            System.out.println(e);
-            return HttpStatus.BAD_REQUEST;
+            System.out.println("Ошибка при добавлении");
+            return ResponseEntity.badRequest().body("Ошибка при добавлении");
         }
-        return HttpStatus.OK;
+        return ResponseEntity.ok().body("OK");
 
     }
 
     @PutMapping(consumes = "application/json", produces = "application/json")
-    public HttpStatus put(@RequestBody Data data)
-    {
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
+    public ResponseEntity put(@RequestBody Data data,
+                              @RequestHeader(value="Authentication") String header) {
+
+        if(!header.equals(getToken))
+            return ResponseEntity.badRequest().body("Неверный токен");
+
         Date dateTimeInDB  = new Date();
 
         try {
@@ -180,11 +196,11 @@ public class MainController {
 
         }catch (Exception e)
         {
-            System.out.println(e);
-            return HttpStatus.BAD_REQUEST;
+            System.out.println("Ошибка при обновлении данных");
+            return ResponseEntity.badRequest().body("Ошибка при обновлении данных");
         }
 
-        return HttpStatus.OK;
+        return ResponseEntity.ok().body("OK");
 
     }
 
