@@ -1,8 +1,6 @@
 package com.service.Controllers;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import com.service.Items.*;
 import com.service.Repositoris.*;
@@ -39,13 +37,32 @@ public class MainController {
     }
 
     @GetMapping()
-    public ResponseEntity<List> gets(@RequestParam(value = "dateStart", defaultValue = "0000.00.00") String dateStart,
-                                @RequestParam(value = "dateEnd", defaultValue = "9999.12.30") String dateEnd,
+    public ResponseEntity<List> gets(@RequestParam(value = "dateStart") java.sql.Date dateStart,
+                                @RequestParam(value = "dateEnd") java.sql.Date dateEnd,
                                 @RequestHeader(value="Authentication") String header) {
 
-        if(header.equals(getToken))
-            return new ResponseEntity<List>(expensesRepository.find(dateStart, dateEnd), HttpStatus.OK);
-        return ResponseEntity.badRequest().build();
+        if (dateEnd == null || dateStart == null)
+            return ResponseEntity.badRequest().build();
+
+        if(!header.equals(getToken))
+            return ResponseEntity.badRequest().build();
+
+        List<Expenses> exList = expensesRepository.find(dateStart, dateEnd);
+        DataGet dataGet;
+
+        List<DataGet> dataGets = null;
+
+        for(Expenses ex : exList)
+        {
+            dataGet = new DataGet(ex.getId(), ex.getIdCname().getName(), ex.getPrice(), ex.getDatePurchase(), ex.getAmount(), ex.getDateTimeCreate(), ex.getDateTimeInDB(), ex.getUserName());
+            if(dataGets == null)
+                dataGets = new ArrayList<>(Collections.singletonList(dataGet));
+            else
+                dataGets.add(dataGet);
+
+        }
+
+        return new ResponseEntity<>(dataGets, HttpStatus.OK);
     }
 
     @DeleteMapping()
@@ -57,6 +74,8 @@ public class MainController {
 
         try {
             for (Integer id : arrayId) {
+
+                if(id == null) continue; //Костыль для тестов
 
                 Date dateTimeInDB = new Date();
 
