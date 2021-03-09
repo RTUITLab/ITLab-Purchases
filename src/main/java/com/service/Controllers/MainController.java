@@ -1,15 +1,13 @@
 package com.service.Controllers;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import com.service.Items.*;
 import com.service.Repositoris.*;
 import com.service.Repositoris.ArchRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,38 +17,67 @@ public class MainController {
     private final ExpensesRepository expensesRepository;
     private final ArchRepository archiveRepository;
 
+    //    docker-mysql
     public MainController(CostRepository costRepository, ExpensesRepository expensesRepository, ArchRepository archiveRepository) {
         this.costRepository = costRepository;
         this.expensesRepository = expensesRepository;
         this.archiveRepository = archiveRepository;
     }
 
-    @GetMapping("/check")
-    @ResponseStatus(HttpStatus.OK)
-    public HttpStatus check()
-    {
-        return HttpStatus.OK;
+    @Value("${Key}")
+        String getToken;
 
+    @GetMapping("/check")
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    public ResponseEntity check(@RequestHeader(value="Authentication") String header)
+    {
+        if(header.equals(getToken))
+            return ResponseEntity.ok().body("OK");
+        return  ResponseEntity.badRequest().body("Неверный токен");
     }
 
     @GetMapping()
-    public List gets(@RequestParam(value = "dateStart", defaultValue = "0000.00.00") String dateStart,
-                                @RequestParam(value = "dateEnd", defaultValue = "9999.12.30") String dateEnd) {
+    public ResponseEntity<List> gets(@RequestParam(value = "dateStart") java.sql.Date dateStart,
+                                @RequestParam(value = "dateEnd") java.sql.Date dateEnd,
+                                @RequestHeader(value="Authentication") String header) {
 
-            return expensesRepository.find(dateStart, dateEnd);
+        if (dateEnd == null || dateStart == null)
+            return ResponseEntity.badRequest().build();
 
+        if(!header.equals(getToken))
+            return ResponseEntity.badRequest().build();
+
+        List<Expenses> exList = expensesRepository.find(dateStart, dateEnd);
+        DataGet dataGet;
+
+        List<DataGet> dataGets = null;
+
+        for(Expenses ex : exList)
+        {
+            dataGet = new DataGet(ex.getId(), ex.getIdCname().getName(), ex.getPrice(), ex.getDatePurchase(), ex.getAmount(), ex.getDateTimeCreate(), ex.getDateTimeInDB(), ex.getUserName());
+            if(dataGets == null)
+                dataGets = new ArrayList<>(Collections.singletonList(dataGet));
+            else
+                dataGets.add(dataGet);
+
+        }
+
+        return new ResponseEntity<>(dataGets, HttpStatus.OK);
     }
 
     @DeleteMapping()
-    public HttpStatus remove(@RequestParam (value = "id") ArrayList<Integer> arrayId) {
+    public ResponseEntity remove(@RequestParam (value = "id") ArrayList<Integer> arrayId,
+                                 @RequestHeader(value="Authentication") String header) {
 
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
+        if(!header.equals(getToken))
+            return ResponseEntity.badRequest().body("Неверный токен");
 
         try {
             for (Integer id : arrayId) {
 
+                if(id == null) continue; //Костыль для тестов
+
                 Date dateTimeInDB = new Date();
-                String stringTimeInArchive = df.format(dateTimeInDB.getTime());
 
                 Expenses ex = expensesRepository.findFirstById(id);
                 CostName cn = ex.getIdCname();
@@ -64,8 +91,9 @@ public class MainController {
                 saveArchiveDB.setDatePurchase(ex.getDatePurchase());
                 saveArchiveDB.setDateTimeCreate(ex.getDateTimeCreate());
                 saveArchiveDB.setDateTimeInDB(ex.getDateTimeInDB());
-                saveArchiveDB.setDateTimeInArchive(stringTimeInArchive);
+                saveArchiveDB.setDateTimeInArchive(dateTimeInDB);
                 saveArchiveDB.setUserName(ex.getUserName());
+                saveArchiveDB.setActToChange("Delete");
 
                 archiveRepository.save(saveArchiveDB);
 
@@ -73,19 +101,22 @@ public class MainController {
             }
         }catch (Exception e)
         {
-            System.out.println(e);
-            return HttpStatus.BAD_REQUEST;
+            System.out.println("Ошибка при удалении");
+            return ResponseEntity.badRequest().body("Ошибка при удалении");
         }
-        return HttpStatus.OK;
+        return ResponseEntity.ok().body("ОК");
     }
 
     @PostMapping(consumes = "application/json", produces = "application/json")
-    public HttpStatus set(@RequestBody ArrayList<ReceivingData> data) {
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    public ResponseEntity set(@RequestBody ArrayList<ReceivingData> data,
+                              @RequestHeader(value="Authentication") String header) {
+
+        if(!header.equals(getToken))
+            return ResponseEntity.badRequest().body("Неверный токен");
 
         Expenses saveExpenses;
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
         Date dateTimeInDB  = new Date();
-        String stringTimeInDB = df.format(dateTimeInDB.getTime());
 
         try {
 
@@ -102,7 +133,7 @@ public class MainController {
                         saveExpenses.setDatePurchase(d.getDatePurchase());
                         saveExpenses.setDateTimeCreate(d.getDateTimeCreate());
                         saveExpenses.setUserName(d.getUserName());
-                        saveExpenses.setDateTimeInDB(stringTimeInDB);
+                        saveExpenses.setDateTimeInDB(dateTimeInDB);
 
                         expensesRepository.save(saveExpenses);
                         System.out.println(saveExpenses.getId());
@@ -122,7 +153,7 @@ public class MainController {
                         saveExpenses.setDatePurchase(d.getDatePurchase());
                         saveExpenses.setDateTimeCreate(d.getDateTimeCreate());
                         saveExpenses.setUserName(d.getUserName());
-                        saveExpenses.setDateTimeInDB(stringTimeInDB);
+                        saveExpenses.setDateTimeInDB(dateTimeInDB);
 
                         expensesRepository.save(saveExpenses);
                         System.out.println(saveExpenses.getId());
@@ -132,19 +163,21 @@ public class MainController {
             }
         }catch (Exception e)
         {
-            System.out.println(e);
-            return HttpStatus.BAD_REQUEST;
+            System.out.println("Ошибка при добавлении");
+            return ResponseEntity.badRequest().body("Ошибка при добавлении");
         }
-        return HttpStatus.OK;
+        return ResponseEntity.ok().body("OK");
 
     }
 
     @PutMapping(consumes = "application/json", produces = "application/json")
-    public HttpStatus put(@RequestBody Data data)
-    {
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh-mm-ss");
+    public ResponseEntity put(@RequestBody Data data,
+                              @RequestHeader(value="Authentication") String header) {
+
+        if(!header.equals(getToken))
+            return ResponseEntity.badRequest().body("Неверный токен");
+
         Date dateTimeInDB  = new Date();
-        String stringTimeInArchive = df.format(dateTimeInDB.getTime());
 
         try {
 
@@ -160,8 +193,9 @@ public class MainController {
             saveArchiveDB.setDatePurchase(ex.getDatePurchase());
             saveArchiveDB.setDateTimeCreate(ex.getDateTimeCreate());
             saveArchiveDB.setDateTimeInDB(ex.getDateTimeInDB());
-            saveArchiveDB.setDateTimeInArchive(stringTimeInArchive);
+            saveArchiveDB.setDateTimeInArchive(dateTimeInDB);
             saveArchiveDB.setUserName(ex.getUserName());
+            saveArchiveDB.setActToChange("Update");
 
             archiveRepository.save(saveArchiveDB);
 
@@ -171,21 +205,38 @@ public class MainController {
             if (data.getAmount() != 0.0)
                 ex.setAmount(data.getAmount());
 
-            if (!data.getDatePurchase().equals(""))
+            if (data.getDatePurchase() != null)
                 ex.setDatePurchase(data.getDatePurchase());
 
             if (!data.getUserName().equals(""))
                 ex.setUserName(data.getUserName());
 
+            if(!data.getName().equals(""))
+            {
+                CostName costName = costRepository.find(data.getName().toUpperCase());
+
+                if (costName == null) {
+
+                    cn = new CostName();
+                    cn.setName(data.getName());
+                    cn.setCheckName(data.getName().toUpperCase());
+                    costRepository.save(cn);
+
+                }
+
+                ex.setIdCname(costRepository.find(data.getName().toUpperCase()));
+
+            }
+
             expensesRepository.save(ex);
 
         }catch (Exception e)
         {
-            System.out.println(e);
-            return HttpStatus.BAD_REQUEST;
+            System.out.println("Ошибка при обновлении данных");
+            return ResponseEntity.badRequest().body("Ошибка при обновлении данных");
         }
 
-        return HttpStatus.OK;
+        return ResponseEntity.ok().body("OK");
 
     }
 

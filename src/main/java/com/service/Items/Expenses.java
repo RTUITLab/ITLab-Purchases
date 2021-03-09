@@ -1,6 +1,9 @@
 package com.service.Items;
 
 import javax.persistence.*;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 @Entity
 @Table(name = "expenses")
@@ -25,16 +28,19 @@ public class Expenses {
     private float price;
 
     @Column(name = "datepurchase")
-    private String datePurchase;
+    @Temporal(TemporalType.DATE)
+    private Date datePurchase;
 
     @Column(name = "amount")
     private Integer amount;
 
     @Column(name = "datetimecreate")
-    private String dateTimeCreate;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dateTimeCreate;
 
     @Column(name = "datetimeindb")
-    private String dateTimeInDB;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dateTimeInDB;
 
     @Column(name = "username")
     private String userName;
@@ -63,11 +69,11 @@ public class Expenses {
         this.price = price;
     }
 
-    public String getDatePurchase() {
+    public Date getDatePurchase() {
         return datePurchase;
     }
 
-    public void setDatePurchase(String datePurchase) {
+    public void setDatePurchase(Date datePurchase) {
         this.datePurchase = datePurchase;
     }
 
@@ -79,19 +85,19 @@ public class Expenses {
         this.amount = amount;
     }
 
-    public String getDateTimeCreate() {
+    public Date getDateTimeCreate() {
         return dateTimeCreate;
     }
 
-    public void setDateTimeCreate(String dateTimeCreate) {
+    public void setDateTimeCreate(Date dateTimeCreate) {
         this.dateTimeCreate = dateTimeCreate;
     }
 
-    public String getDateTimeInDB() {
+    public Date getDateTimeInDB() {
         return dateTimeInDB;
     }
 
-    public void setDateTimeInDB(String dateTimeInDB) {
+    public void setDateTimeInDB(Date dateTimeInDB) {
         this.dateTimeInDB = dateTimeInDB;
     }
 

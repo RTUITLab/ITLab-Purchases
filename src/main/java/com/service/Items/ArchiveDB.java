@@ -1,6 +1,7 @@
 package com.service.Items;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Table(name = "archive")
@@ -19,22 +20,29 @@ public class ArchiveDB {
     private float price;
 
     @Column(name = "datepurchase")
-    private String datePurchase;
+    @Temporal(TemporalType.DATE)
+    private Date datePurchase;
 
     @Column(name = "amount")
     private Integer amount;
 
     @Column(name = "datetimecreate")
-    private String dateTimeCreate;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dateTimeCreate;
 
     @Column(name = "datetimeindb")
-    private String dateTimeInDB;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dateTimeInDB;
 
     @Column(name = "username")
     private String userName;
 
     @Column(name = "datetimeinarchive")
-    private String dateTimeInArchive;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dateTimeInArchive;
+
+    @Column(name = "acttochange")
+    private String actToChange;
 
     public Integer getId() {
         return id;
@@ -68,11 +76,11 @@ public class ArchiveDB {
         this.price = price;
     }
 
-    public String getDatePurchase() {
+    public Date getDatePurchase() {
         return datePurchase;
     }
 
-    public void setDatePurchase(String datePurchase) {
+    public void setDatePurchase(Date datePurchase) {
         this.datePurchase = datePurchase;
     }
 
@@ -84,19 +92,19 @@ public class ArchiveDB {
         this.amount = amount;
     }
 
-    public String getDateTimeCreate() {
+    public Date getDateTimeCreate() {
         return dateTimeCreate;
     }
 
-    public void setDateTimeCreate(String dateTimeCreate) {
+    public void setDateTimeCreate(Date dateTimeCreate) {
         this.dateTimeCreate = dateTimeCreate;
     }
 
-    public String getDateTimeInDB() {
+    public Date getDateTimeInDB() {
         return dateTimeInDB;
     }
 
-    public void setDateTimeInDB(String dateTimeInDB) {
+    public void setDateTimeInDB(Date dateTimeInDB) {
         this.dateTimeInDB = dateTimeInDB;
     }
 
@@ -108,12 +116,20 @@ public class ArchiveDB {
         this.userName = userName;
     }
 
-    public String getDateTimeInArchive() {
+    public Date getDateTimeInArchive() {
         return dateTimeInArchive;
     }
 
-    public void setDateTimeInArchive(String dateTimeInArchive) {
+    public void setDateTimeInArchive(Date dateTimeInArchive) {
         this.dateTimeInArchive = dateTimeInArchive;
+    }
+
+    public void setActToChange(String actToChange) {
+        this.actToChange = actToChange;
+    }
+
+    public String getActToChange() {
+        return actToChange;
     }
 
 }
