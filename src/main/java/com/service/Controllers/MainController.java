@@ -186,11 +186,28 @@ public class MainController {
             if (data.getAmount() != 0.0)
                 ex.setAmount(data.getAmount());
 
-            if (!data.getDatePurchase().equals(""))
+            if (data.getDatePurchase() != null)
                 ex.setDatePurchase(data.getDatePurchase());
 
             if (!data.getUserName().equals(""))
                 ex.setUserName(data.getUserName());
+
+            if(!data.getName().equals(""))
+            {
+                CostName costName = costRepository.find(data.getName().toUpperCase());
+
+                if (costName == null) {
+
+                    cn = new CostName();
+                    cn.setName(data.getName());
+                    cn.setCheckName(data.getName().toUpperCase());
+                    costRepository.save(cn);
+
+                }
+
+                ex.setIdCname(costRepository.find(data.getName().toUpperCase()));
+
+            }
 
             expensesRepository.save(ex);
 

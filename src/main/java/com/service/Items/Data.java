@@ -8,13 +8,15 @@ public class Data {
     private final Date datePurchase;
     private final int amount;
     private final String userName;
+    private final String name;
 
-    public Data(int id, float price, Date datePurchase, int amount, String userName) {
+    public Data(int id, float price, Date datePurchase, int amount, String userName, String name) {
         this.id = id;
         this.price = price;
         this.datePurchase = datePurchase;
         this.amount = amount;
         this.userName = userName;
+        this.name = name;
     }
 
     public Data() {
@@ -23,6 +25,7 @@ public class Data {
         this.datePurchase = null;
         this.amount = 0;
         this.userName = "";
+        this.name = "";
     }
 
     public int getId() { return id; }
@@ -34,4 +37,6 @@ public class Data {
     public Date getDatePurchase() { return datePurchase; }
 
     public String getUserName() { return userName; }
+
+    public String getName() { return name; }
 }
